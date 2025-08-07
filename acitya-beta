@@ -11,7 +11,7 @@ local Camera = workspace.CurrentCamera
 local Window = Rayfield:CreateWindow({
    Name = "AcityaHub",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-   LoadingTitle = "AcityaHub",
+   LoadingTitle = "AcityaHub Made By Hoshi",
    LoadingSubtitle = "by Hoshi",
    ShowText = "Acitya", -- for mobile users to unhide rayfield, change if you'd like
    Theme = "DarkBlue", -- Check https://docs.sirius.menu/rayfield/configuration/themes
@@ -95,7 +95,7 @@ end
 
 local MainTab = Window:CreateTab("📖 Main")
 local TeleportTab = Window:CreateTab("🚀 Teleport")
-local MovementTab = Window:CreateTab("📜 Misc")
+local MiscTab = Window:CreateTab("📜 Misc")
 local ShopTab = Window:CreateTab("🛒 Shop")
 
 -- Main Tab
@@ -179,9 +179,9 @@ local AutoDigToggle = MainTab:CreateToggle({
    end,
 })
 
-local SellSection = MainTab:CreateSection(" Sell")
+local SellSection = ShopTab:CreateSection(" Sell")
 
-local SellAllButton = MainTab:CreateButton({
+local SellAllButton = ShopTab:CreateButton({
    Name = "Sell All Items",
    Callback = function()
         task.spawn(function()
@@ -193,7 +193,7 @@ local SellAllButton = MainTab:CreateButton({
    end,
 })
 
-local AutoSellToggle = MainTab:CreateToggle({
+local AutoSellToggle = ShopTab:CreateToggle({
    Name = "Auto Sell All",
    CurrentValue = false,
    Flag = "AutoSellAll",
@@ -219,7 +219,7 @@ local AutoSellToggle = MainTab:CreateToggle({
    end,
 })
 
-local AutoSellSlider = MainTab:CreateSlider({
+local AutoSellSlider = ShopTab:CreateSlider({
    Name = "Auto Sell Interval (s)",
    Range = {0, 300},
    Increment = 1,
@@ -585,9 +585,9 @@ local NPCDropdown = TeleportTab:CreateDropdown({
 })
 
 -- Movement Tab
-local MovementSection = MovementTab:CreateSection("Movement")
+local MovementSection = MiscTab:CreateSection("Movement")
 
-local WalkspeedSlider = MovementTab:CreateSlider({
+local WalkspeedSlider = MiscTab:CreateSlider({
    Name = "Walkspeed",
    Range = {0, 100},
    Increment = 1,
@@ -601,7 +601,7 @@ local WalkspeedSlider = MovementTab:CreateSlider({
    end,
 })
 
-local JumpPowerSlider = MovementTab:CreateSlider({
+local JumpPowerSlider = MiscTab:CreateSlider({
    Name = "Jump Power",
    Range = {50, 200},
    Increment = 1,
@@ -615,7 +615,7 @@ local JumpPowerSlider = MovementTab:CreateSlider({
    end,
 })
 
-local GravitySlider = MovementTab:CreateSlider({
+local GravitySlider = MiscTab:CreateSlider({
    Name = "Gravity",
    Range = {0, 999},
    Increment = 1,
@@ -627,7 +627,7 @@ local GravitySlider = MovementTab:CreateSlider({
    end,
 })
 
-local FOVSlider = MovementTab:CreateSlider({
+local FOVSlider = MiscTab:CreateSlider({
    Name = "FOV",
    Range = {20, 120},
    Increment = 1,
@@ -673,7 +673,7 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-local FlySpeedSlider = MovementTab:CreateSlider({
+local FlySpeedSlider = MiscTab:CreateSlider({
    Name = "Fly Speed",
    Range = {10, 999},
    Increment = 1,
@@ -685,7 +685,7 @@ local FlySpeedSlider = MovementTab:CreateSlider({
    end,
 })
 
-local FlyToggle = MovementTab:CreateToggle({
+local FlyToggle = MiscTab:CreateToggle({
    Name = "Fly",
    CurrentValue = false,
    Flag = "Fly",
@@ -710,7 +710,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-local ResetButton = MovementTab:CreateButton({
+local ResetButton = MiscTab:CreateButton({
    Name = "Reset Player",
    Callback = function()
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
@@ -724,7 +724,7 @@ local ResetButton = MovementTab:CreateButton({
 })
 
 -- Player Teleport
-local PlayerSection = MovementTab:CreateSection("Player Teleport")
+local PlayerSection = MiscTab:CreateSection("Player Teleport")
 
 local function getPlayers()
     local t = {}
@@ -734,7 +734,7 @@ local function getPlayers()
     return t
 end
 
-local PlayerDropdown = MovementTab:CreateDropdown({
+local PlayerDropdown = MiscTab:CreateDropdown({
    Name = "Teleport to Player",
    Options = getPlayers(),
    CurrentOption = {"Select Player"},
@@ -763,7 +763,7 @@ local PlayerDropdown = MovementTab:CreateDropdown({
    end,
 })
 
-local RefreshPlayersButton = MovementTab:CreateButton({
+local RefreshPlayersButton = MiscTab:CreateButton({
    Name = "Refresh Player List",
    Callback = function()
         PlayerDropdown:Refresh(getPlayers())
