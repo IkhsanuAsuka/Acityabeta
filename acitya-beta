@@ -1,5 +1,13 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local UserInputService = game:GetService("UserInputService")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
+
 local Window = Rayfield:CreateWindow({
    Name = "AcityaHub",
    Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
@@ -37,4 +45,135 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local Tab = Window:CreateTab("🌐 Information")
+local runningAutoDig = false
+local autoSellAll = false
+local autoSellInterval = 10
+local runningPenguinQuest = false
+local runningBossHit = false
+local selectedCharm = nil
+local infJump = false
+local noclip = false
+local fly = false
+local flySpeed = 50
+local defaultGravity = workspace.Gravity
+local defaultFOV = Camera.FieldOfView
+
+local function safeFire(eventPath, ...)
+    local args = {...}
+    local success, err = pcall(function()
+        if eventPath then
+            local event = eventPath()
+            if event then
+                local realArgs = {}
+                for _, v in ipairs(args) do
+                    table.insert(realArgs, (type(v) == "function") and v() or v)
+                end
+                event:FireServer(unpack(realArgs))
+            else
+                error("Event not found")
+            end
+        else
+            local realArgs = {}
+            for _, v in ipairs(args) do
+                if type(v) == "function" then
+                    table.insert(realArgs, v())
+                else
+                    table.insert(realArgs, v)
+                end
+            end
+        end
+    end)
+    if not success then
+        Rayfield:Notify({
+            Title = "Error",
+            Content = tostring(err),
+            Duration = 3,
+            Image = 108632720139222
+        })
+    end
+end
+
+local MainTab = Window:CreateTab("Main", "shovel")
+local TeleportTab = Window:CreateTab("Teleport", "door-closed")
+local MovementTab = Window:CreateTab("Movement", "person-standing")
+
+-- Main Tab
+local DigSection = MainTab:CreateSection(" Dig")
+
+local AutoDigToggle = MainTab:CreateToggle({
+   Name = "Auto Dig",
+   CurrentValue = false,
+   Flag = "AutoDig",
+   Callback = function(Value)
+        runningAutoDig = Value
+        if Value then
+            task.spawn(function()
+                while runningAutoDig do
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, true, game, 0)
+                    task.wait(0.05)
+                    VirtualInputManager:SendMouseButtonEvent(0, 0, 0, false, game, 0)
+
+                    task.wait(1.5)
+
+                    local vector = Vector3
+                    local finishArgs = {
+                        0,
+                        {
+                            {
+                                Orientation = vector.zero,
+                                Transparency = 1,
+                                Name = "PositionPart",
+                                Position = vector.new(2048.3315, 108.6206, -321.5524),
+                                Color = Color3.fromRGB(163, 162, 165),
+                                Material = Enum.Material.Plastic,
+                                Shape = Enum.PartType.Block,
+                                Size = vector.new(0.1, 0.1, 0.1)
+                            },
+                            {
+                                Orientation = vector.new(0, 90, 90),
+                                Transparency = 0,
+                                Name = "CenterCylinder",
+                                Position = vector.new(2048.3315, 108.5706, -321.5524),
+                                Color = Color3.fromRGB(135, 114, 85),
+                                Material = Enum.Material.Pebble,
+                                Shape = Enum.PartType.Cylinder,
+                                Size = vector.new(0.2, 6.4162, 5.5873)
+                            }
+                        }
+                    }
+
+                    safeFire(function()
+                        return ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Dig_Finished")
+                    end, unpack(finishArgs))
+
+                    local player = game:GetService("Players").LocalPlayer
+                    local backpack = player:WaitForChild("Backpack")
+                    local character = player.Character or player.CharacterAdded:Wait()
+
+                    local validShovelsFolder = ReplicatedStorage:WaitForChild("PlayerItems"):WaitForChild("Shovels")
+                    local validShovelNames = {}
+                    for _, shovel in ipairs(validShovelsFolder:GetChildren()) do
+                        validShovelNames[shovel.Name] = true
+                    end
+
+                    for _, tool in ipairs(character:GetChildren()) do
+                        if tool:IsA("Tool") then
+                            tool.Parent = backpack
+                        end
+                    end
+
+                    task.wait(0)
+
+                    for _, tool in ipairs(backpack:GetChildren()) do
+                        if tool:IsA("Tool") and validShovelNames[tool.Name] then
+                            tool.Parent = character
+                            break
+                        end
+                    end
+
+                    task.wait(0.5)
+                end
+            end)
+        end
+   end,
+})
