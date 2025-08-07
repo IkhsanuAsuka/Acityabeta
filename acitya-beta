@@ -9,9 +9,9 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 local Window = Rayfield:CreateWindow({
-   Name = "AcityaHub",
-   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-   LoadingTitle = "AcityaHub Made By Hoshi",
+   Name = "AcityaHub By Hoshi",
+   Icon = 113554722672817, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   LoadingTitle = "AcityaHub Version 1.0",
    LoadingSubtitle = "by Hoshi",
    ShowText = "Acitya", -- for mobile users to unhide rayfield, change if you'd like
    Theme = "DarkBlue", -- Check https://docs.sirius.menu/rayfield/configuration/themes
