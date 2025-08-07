@@ -177,3 +177,408 @@ local AutoDigToggle = MainTab:CreateToggle({
         end
    end,
 })
+
+local SellSection = MainTab:CreateSection(" Sell")
+
+local SellAllButton = MainTab:CreateButton({
+   Name = "Sell All Items",
+   Callback = function()
+        task.spawn(function()
+            local args = {
+                workspace:WaitForChild("World"):WaitForChild("NPCs"):WaitForChild("Rocky")
+            }
+            game:GetService("ReplicatedStorage"):WaitForChild("DialogueRemotes"):WaitForChild("SellAllItems"):FireServer(unpack(args))
+        end)
+   end,
+})
+
+local AutoSellToggle = MainTab:CreateToggle({
+   Name = "Auto Sell All",
+   CurrentValue = false,
+   Flag = "AutoSellAll",
+   Callback = function(Value)
+        autoSellAll = Value
+        if Value then
+            task.spawn(function()
+                while autoSellAll do
+                    local args = {
+                        workspace:WaitForChild("World"):WaitForChild("NPCs"):WaitForChild("Rocky")
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("DialogueRemotes"):WaitForChild("SellAllItems"):FireServer(unpack(args))
+                    Rayfield:Notify({
+                        Title = "Auto Sell",
+                        Content = "All items sold.",
+                        Duration = 3,
+                        Image = 108632720139222
+                    })
+                    task.wait(autoSellInterval)
+                end
+            end)
+        end
+   end,
+})
+
+local AutoSellSlider = MainTab:CreateSlider({
+   Name = "Auto Sell Interval (s)",
+   Range = {0, 300},
+   Increment = 1,
+   Suffix = "seconds",
+   CurrentValue = 10,
+   Flag = "AutoSellInterval",
+   Callback = function(Value)
+        autoSellInterval = Value
+   end,
+})
+
+local JournalSection = MainTab:CreateSection(" Journal")
+
+local ClaimJournalsButton = MainTab:CreateButton({
+   Name = "Claim All Journals",
+   Callback = function()
+        local scroller = game:GetService("Players").LocalPlayer.PlayerGui.HUD.Frame.Journal.Scroller
+        local remote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Journal_Claim")
+
+        local count = 0
+
+        for _, item in ipairs(scroller:GetChildren()) do
+            if item:IsA("TextButton") or item:IsA("ImageButton") then
+                remote:FireServer(item.Name)
+                count += 1
+                task.wait(0)
+            end
+        end
+
+        Rayfield:Notify({
+            Title = "Rescued Journals",
+            Content = "Total: " .. count,
+            Duration = 5,
+            Image = 108632720139222
+        })
+   end,
+})
+
+local CharmsSection = MainTab:CreateSection(" Charms")
+
+local charmInternalNames = {
+    "Controlled Glove",
+    "Lucky Bell",
+    "Blue Coil",
+    "Rock Pounder",
+    "Shoulder Bag",
+    "Vision Goggles"
+}
+
+local charmDisplayToInternal = {}
+local charmDisplayNames = {}
+
+local purchaseablesFolder = workspace:WaitForChild("World"):WaitForChild("Interactive"):WaitForChild("Purchaseable")
+
+for _, model in ipairs(purchaseablesFolder:GetChildren()) do
+    if model:IsA("Model") and model:FindFirstChild("PurchasePrompt") then
+        local prompt = model:FindFirstChild("PurchasePrompt")
+        local displayText = prompt and prompt.ObjectText
+        local internalName = model.Name
+
+        if displayText and table.find(charmInternalNames, internalName) then
+            charmDisplayToInternal[displayText] = internalName
+            table.insert(charmDisplayNames, displayText)
+        end
+    end
+end
+
+local exceptions = {
+    ["Rock Pounder"] = workspace.World.Map["Cinder Isle"]["Fernhill Forest"]:FindFirstChild("Rock Pounder"),
+    ["Shoulder Bag"] = workspace.World.Map["Cinder Isle"]["Fernhill Forest"]:FindFirstChild("Shoulder Bag")
+}
+
+for internalName, model in pairs(exceptions) do
+    if model and model:FindFirstChild("PurchasePrompt") then
+        local prompt = model.PurchasePrompt
+        local displayText = prompt and prompt.ObjectText
+        if displayText then
+            charmDisplayToInternal[displayText] = internalName
+            table.insert(charmDisplayNames, displayText)
+        end
+    end
+end
+
+local function buyCharm(charmName)
+    local success, err = pcall(function()
+        ReplicatedStorage:WaitForChild("DialogueRemotes"):WaitForChild("AttemptBuyCharm"):InvokeServer(charmName)
+    end)
+end
+
+local CharmDropdown = MainTab:CreateDropdown({
+   Name = "Buy Charms",
+   Options = charmDisplayNames,
+   CurrentOption = {"Select Charm"},
+   MultipleOptions = false,
+   Flag = "CharmBuy",
+   Callback = function(Option)
+        local displayName = Option[1]
+        selectedCharm = charmDisplayToInternal[displayName]
+        if selectedCharm then
+            buyCharm(selectedCharm)
+        end
+   end,
+})
+
+local BuyAgainButton = MainTab:CreateButton({
+   Name = "Buy Again",
+   Callback = function()
+        if selectedCharm then
+            buyCharm(selectedCharm)
+        else
+            Rayfield:Notify({
+                Title = "Select a Charm",
+                Content = "You must choose a charm first.",
+                Duration = 3,
+                Image = 108632720139222
+            })
+        end
+   end,
+})
+
+local QuestSection = MainTab:CreateSection(" Quests")
+
+local AutoPizzaToggle = MainTab:CreateToggle({
+   Name = "Auto Pizza Delivery Quest",
+   CurrentValue = false,
+   Flag = "AutoPizzaQuest",
+   Callback = function(Value)
+        runningPenguinQuest = Value
+        if Value then
+            task.spawn(function()
+                while runningPenguinQuest do
+                    local args = { "Pizza Penguin" }
+                    game:GetService("ReplicatedStorage"):WaitForChild("DialogueRemotes"):WaitForChild("StartInfiniteQuest"):InvokeServer(unpack(args))
+                    task.wait(1)
+
+                    local penguin = workspace:FindFirstChild("Active") and workspace.Active:FindFirstChild("PizzaCustomers") and workspace.Active.PizzaCustomers:FindFirstChild("Valued Customer") and workspace.Active.PizzaCustomers["Valued Customer"]:FindFirstChild("Penguin")
+                    if penguin and penguin:IsA("Model") and penguin.PrimaryPart then
+                        local char = game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+                        local hrp = char:WaitForChild("HumanoidRootPart")
+                        hrp.CFrame = penguin.PrimaryPart.CFrame + Vector3.new(0, 5, 0)
+                        task.wait(1)
+                        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Quest_DeliverPizza"):InvokeServer()
+                    end
+                    task.wait(1)
+
+                    game:GetService("ReplicatedStorage"):WaitForChild("DialogueRemotes"):WaitForChild("CompleteInfiniteQuest"):InvokeServer(unpack(args))
+
+                    local char = game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+                    local hrp = char:WaitForChild("HumanoidRootPart")
+                    hrp.CFrame = CFrame.new(4173, 1193, -4329)
+
+                    task.wait(60)
+                end
+            end)
+        end
+   end,
+})
+
+-- Teleport Tab
+local TeleportSection = TeleportTab:CreateSection(" Teleport")
+
+local EnchantmentButton = TeleportTab:CreateButton({
+   Name = "Teleport to Enchantment Altar",
+   Callback = function()
+        local char = game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = CFrame.new(4148, -669, 2551)
+   end,
+})
+
+local MeteorButton = TeleportTab:CreateButton({
+   Name = "Teleport to Meteor",
+   Callback = function()
+        local meteor = workspace:FindFirstChild("Active") and workspace.Active:FindFirstChild("ActiveMeteor")
+        if meteor and meteor:IsA("Model") and meteor.PrimaryPart then
+            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            hrp.CFrame = meteor.PrimaryPart.CFrame + Vector3.new(0, 5, 0)
+            Rayfield:Notify({
+                Title = "Teleport",
+                Content = "Teleported to Meteor.",
+                Duration = 3,
+                Image = 4483362458
+            })
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Meteor not found.",
+                Duration = 3,
+                Image = 108632720139222
+            })
+        end
+   end,
+})
+
+local MerchantButton = TeleportTab:CreateButton({
+   Name = "Teleport to Traveling Merchant",
+   Callback = function()
+        local merchant = workspace.World.NPCs:FindFirstChild("Merchant Cart")
+        if merchant and merchant:FindFirstChild("Traveling Merchant") and merchant["Traveling Merchant"].PrimaryPart then
+            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            hrp.CFrame = merchant["Traveling Merchant"].PrimaryPart.CFrame + Vector3.new(0, 5, 0)
+            Rayfield:Notify({
+                Title = "Teleport",
+                Content = "Teleported to Traveling Merchant.",
+                Duration = 3,
+                Image = 108632720139222
+            })
+        else
+            Rayfield:Notify({
+                Title = "Error",
+                Content = "Traveling Merchant not found.",
+                Duration = 3,
+                Image = 108632720139222
+            })
+        end
+   end,
+})
+
+-- Spawn Teleports
+local TeleportFolder = workspace:WaitForChild("Spawns"):WaitForChild("TeleportSpawns")
+local teleportNames = {}
+local teleportCoords = {}
+
+for _, part in ipairs(TeleportFolder:GetChildren()) do
+    if part:IsA("BasePart") then
+        table.insert(teleportNames, part.Name)
+        teleportCoords[part.Name] = part.Position
+    end
+end
+
+local SpawnDropdown = TeleportTab:CreateDropdown({
+   Name = "Teleport Spawns",
+   Options = teleportNames,
+   CurrentOption = {"Select Spawn"},
+   MultipleOptions = false,
+   Flag = "SpawnTP",
+   Callback = function(Option)
+        local selected = Option[1]
+        local pos = teleportCoords[selected]
+        if pos then
+            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            hrp.CFrame = CFrame.new(pos)
+        end
+   end,
+})
+
+-- Purchasable Teleports
+local itemNames = {}
+local itemPositions = {}
+
+for _, model in ipairs(purchaseablesFolder:GetChildren()) do
+    if model:IsA("Model") and model.PrimaryPart then
+        local prompt = model:FindFirstChild("PurchasePrompt")
+        if prompt and prompt:IsA("ProximityPrompt") then
+            local objectText = prompt.ObjectText
+            if objectText and objectText ~= "" then
+                table.insert(itemNames, objectText)
+                itemPositions[objectText] = model.PrimaryPart.Position
+            end
+        end
+    end
+end
+
+local PurchasableDropdown = TeleportTab:CreateDropdown({
+   Name = "Teleport to Purchasable",
+   Options = itemNames,
+   CurrentOption = {"Select Item"},
+   MultipleOptions = false,
+   Flag = "PurchasableTP",
+   Callback = function(Option)
+        local selected = Option[1]
+        local pos = itemPositions[selected]
+        if pos then
+            local char = game:GetService("Players").LocalPlayer.Character or game:GetService("Players").LocalPlayer.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            hrp.CFrame = CFrame.new(pos)
+        end
+   end,
+})
+
+-- Boss Teleports
+local bossNames = {
+    "Dire Wolf",
+    "Fuzzball",
+    "Basilisk",
+    "King Crab",
+    "Molten Monstrosity",
+    "Candlelight Phantom",
+    "Giant Spider"
+}
+
+local BossDropdown = TeleportTab:CreateDropdown({
+   Name = "Teleport to Boss",
+   Options = bossNames,
+   CurrentOption = {"Select Boss"},
+   MultipleOptions = false,
+   Flag = "BossTP",
+   Callback = function(Option)
+        local selected = Option[1]
+        local ambience = workspace.World.Zones._Ambience
+        for _, obj in pairs(ambience:GetChildren()) do
+            if obj.Name:sub(1, #selected) == selected then
+                local hrp = game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    hrp.CFrame = obj.CFrame + Vector3.new(0, 0, 0)
+                end
+                break
+            end
+        end
+   end,
+})
+
+local BossHitToggle = TeleportTab:CreateToggle({
+   Name = "Boss Hit",
+   CurrentValue = false,
+   Flag = "BossHit",
+   Callback = function(Value)
+        runningBossHit = Value
+        if Value then
+            task.spawn(function()
+                while runningBossHit do
+                    local args = {
+                        true
+                    }
+                    game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Dig_Boss_OnHit"):FireServer(unpack(args))
+                    task.wait(0)
+                end
+            end)
+        end
+   end,
+})
+
+-- NPC Teleports
+local npcsFolder = workspace:WaitForChild("World"):WaitForChild("NPCs")
+local npcNames = {}
+local npcPositions = {}
+
+for _, npc in ipairs(npcsFolder:GetChildren()) do
+    if npc:IsA("Model") and npc.PrimaryPart then
+        table.insert(npcNames, npc.Name)
+        npcPositions[npc.Name] = npc.PrimaryPart.Position
+    end
+end
+
+local NPCDropdown = TeleportTab:CreateDropdown({
+   Name = "Teleport to NPC",
+   Options = npcNames,
+   CurrentOption = {"Select NPC"},
+   MultipleOptions = false,
+   Flag = "NPCTP",
+   Callback = function(Option)
+        local selected = Option[1]
+        local pos = npcPositions[selected]
+        if pos then
+            local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+            local hrp = char:WaitForChild("HumanoidRootPart")
+            hrp.CFrame = CFrame.new(pos + Vector3.new(0, 5, 0))
+        end
+   end,
+})
