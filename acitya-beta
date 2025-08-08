@@ -10,11 +10,11 @@ local Camera = workspace.CurrentCamera
 
 local Window = Rayfield:CreateWindow({
    Name = "AcityaHub By Hoshi",
-   Icon = 113554722672817, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
+   Icon = 113569951370601, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
    LoadingTitle = "AcityaHub Version 1.0",
    LoadingSubtitle = "by Hoshi",
    ShowText = "Acitya", -- for mobile users to unhide rayfield, change if you'd like
-   Theme = "DarkBlue", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+   Theme = "Green", -- Check https://docs.sirius.menu/rayfield/configuration/themes
 
    ToggleUIKeybind = "P", -- The keybind to toggle the UI visibility (string like "K" or Enum.KeyCode)
 
@@ -88,7 +88,7 @@ local function safeFire(eventPath, ...)
             Title = "Error",
             Content = tostring(err),
             Duration = 3,
-            Image = 108632720139222
+            Image = 113569951370601
         })
     end
 end
@@ -210,7 +210,7 @@ local AutoSellToggle = ShopTab:CreateToggle({
                         Title = "Auto Sell",
                         Content = "All items sold.",
                         Duration = 3,
-                        Image = 108632720139222
+                        Image = 113569951370601
                     })
                     task.wait(autoSellInterval)
                 end
@@ -253,7 +253,7 @@ local ClaimJournalsButton = MainTab:CreateButton({
             Title = "Rescued Journals",
             Content = "Total: " .. count,
             Duration = 5,
-            Image = 108632720139222
+            Image = 113569951370601
         })
    end,
 })
@@ -334,7 +334,7 @@ local BuyAgainButton = ShopTab:CreateButton({
                 Title = "Select a Charm",
                 Content = "You must choose a charm first.",
                 Duration = 3,
-                Image = 108632720139222
+                Image = 113569951370601
             })
         end
    end,
@@ -402,14 +402,14 @@ local MeteorButton = TeleportTab:CreateButton({
                 Title = "Teleport",
                 Content = "Teleported to Meteor.",
                 Duration = 3,
-                Image = 4483362458
+                Image = 113569951370601
             })
         else
             Rayfield:Notify({
                 Title = "Error",
                 Content = "Meteor not found.",
                 Duration = 3,
-                Image = 108632720139222
+                Image = 113569951370601
             })
         end
    end,
@@ -427,14 +427,14 @@ local MerchantButton = TeleportTab:CreateButton({
                 Title = "Teleport",
                 Content = "Teleported to Traveling Merchant.",
                 Duration = 3,
-                Image = 108632720139222
+                Image = 113569951370601
             })
         else
             Rayfield:Notify({
                 Title = "Error",
                 Content = "Traveling Merchant not found.",
                 Duration = 3,
-                Image = 108632720139222
+                Image = 113569951370601
             })
         end
    end,
@@ -511,7 +511,8 @@ local bossNames = {
     "King Crab",
     "Molten Monstrosity",
     "Candlelight Phantom",
-    "Giant Spider"
+    "Giant Spider",
+    "Void Worm",
 }
 
 local BossDropdown = TeleportTab:CreateDropdown({
@@ -750,14 +751,14 @@ local PlayerDropdown = MiscTab:CreateDropdown({
                 Title = "Teleport",
                 Content = "Teleported to " .. v,
                 Duration = 3,
-                Image = 108632720139222
+                Image = 113569951370601
             })
         else
             Rayfield:Notify({
                 Title = "Error",
                 Content = "Player not found.",
                 Duration = 3,
-                Image = 108632720139222
+                Image = 113569951370601
             })
         end
    end,
@@ -771,7 +772,7 @@ local RefreshPlayersButton = MiscTab:CreateButton({
             Title = "Player List",
             Content = "Player list has been updated.",
             Duration = 2,
-            Image = 108632720139222
+            Image = 113569951370601
         })
    end,
 })
@@ -780,5 +781,5 @@ Rayfield:Notify({
     Title = "Acitya Hub",
     Content = "AcityaHub successfully Loaded",
     Duration = 5,
-    Image = 108632720139222
+    Image = 113569951370601
 })
